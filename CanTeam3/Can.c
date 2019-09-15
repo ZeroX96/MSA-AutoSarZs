@@ -33,13 +33,14 @@
 	Local function to check on the TXOK bit for specified 
 	period/time tick.
 */
-STATIC void CanMainFunctionWrite(uint8 can_controller_id, 
+STATIC void CanMainFunctionTxPolling(uint8 can_controller_id, 
 	float32 period);
-
+STATIC void CanMainFunctionTxProcessing(void);
 /***************************************************************/
 /*            Private Globals Declarations                     */
 /***************************************************************/
-
+STATIC uint32 * CanControllerRegiser_Ptr = NULL_PTR;
+STATIC uint32 * CanStatusRegister_Ptr    = NULL_PTR;
 
 /***************************************************************
 *                    Functions Definitions                     *
@@ -56,60 +57,94 @@ Std_ReturnType Can_GetControllerMode(uint8 Controller,
 #if (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_0)
 void Can_MainFunction_Write_0(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_0);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_1)
 void Can_MainFunction_Write_1(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_1);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_2)
 void Can_MainFunction_Write_2(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_2);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_3)
 void Can_MainFunction_Write_3(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_3);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_4)
 void Can_MainFunction_Write_4(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_4);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_5)
 void Can_MainFunction_Write_5(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_5);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_6)
 void Can_MainFunction_Write_6(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_6);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_7)
 void Can_MainFunction_Write_7(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_7);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_8)
 void Can_MainFunction_Write_8(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_8);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_9)
 void Can_MainFunction_Write_9(void)
 {
-	CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_9);
+	CanMainFunctionTxProcessing();
 }
 #elif (CAN_MAIN_FUNCTION_WRITE_PERIOD == PERIOD_10)
 void Can_MainFunction_Write_10(void)
 {
+	CanMainFunctionTxProcessing();
+}
+#else /* No period was defined. */
+void Can_MainFunction_Write(void)
+{
+	switch (CAN_CONTROLLER_ID)
+	{
+		case CAN_CONTROLLER_0:
+			CanControllerRegiser_Ptr = &CAN0_STS_R;
+			break;
+		case CAN_CONTROLLER_1:
+			CanControllerRegiser_Ptr = &CAN1_STS_R;
+			break;
+		default:
+			CanControllerRegiser_Ptr = &CAN0_STS_R;
+			break;
+	}
+
+	while (BIT_IS_CLEAR(*CanControllerRegiser_Ptr, CANSTS_TXOK)) 
+	{
+	};
+}
+#endif /* CAN_MAIN_FUNCTION_WRITE_PERIOD. */
+
+
+/**************************************************************/
+/*           Private Functions Definitions                    */
+/**************************************************************/
+/*
+Processing the Can transmission:
+polling, mixed or interrupt.
+*/
+STATIC void CanMainFunctionTxProcessing(void)
+{
 	switch (CAN_TX_PROCESSING)
 	{
 		case POLLING:
-			CanMainFunctionWrite(CAN_CONTROLLER_ID, PERIOD_10);
+			CanMainFunctionTxPolling(CAN_CONTROLLER_ID, PERIOD_10);
 			break;
 		case MIXED: /* TO BE IMPLEMENTED. */
 			break;
@@ -118,22 +153,12 @@ void Can_MainFunction_Write_10(void)
 			break;
 	}
 }
-#else /* No period was defined. */
-void Can_MainFunction_Write(void)
-{
-
-}
-#endif /* CAN_MAIN_FUNCTION_WRITE_PERIOD. */
-
-
-/**************************************************************/
-/*           Private Functions Definitions                    */
-/**************************************************************/
-STATIC void CanMainFunctionWrite(uint8 can_controller_id, 
+/*
+	Polling on the transmission successfulness. 
+*/
+STATIC void CanMainFunctionTxPolling(uint8 can_controller_id, 
 	float32 period)
 {
-	uint32 * CanControllerRegiser_Ptr = NULL_PTR;
-
 	switch (can_controller_id)
 	{
 		case CAN_CONTROLLER_0:
@@ -154,3 +179,4 @@ STATIC void CanMainFunctionWrite(uint8 can_controller_id,
 		period = period - 1;     /* TO BE EDITTED */
 	}
 }
+
