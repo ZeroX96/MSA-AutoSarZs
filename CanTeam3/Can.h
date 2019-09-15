@@ -100,21 +100,21 @@
 #define MIXED                          ((uint8)2)
 /* Two Can contorllers supported by Tivac 
    Can controller 0 */
-#define CAN_CONTROLLER0                ((uint8)0)
+#define CAN_CONTROLLER_0                ((uint8)0)
 /* Can controller 1*/
-#define CAN_CONTROLLER1                ((uint8)1)
+#define CAN_CONTROLLER_1                ((uint8)1)
 /* Supported periods for the main function write */
-#define PERIOD0                 (0)
-#define PERIOD1                 (1)
-#define PERIOD2                 (2)
-#define PERIOD3                 (3)
-#define PERIOD4                 (4)
-#define PERIOD5                 (5)
-#define PERIOD6                 (6)
-#define PERIOD7                 (7)
-#define PERIOD8                 (8)
-#define PERIOD9                 (9)
-#define PERIOD10                (10)
+#define PERIOD_0                 (0)
+#define PERIOD_1                 (1)
+#define PERIOD_2                 (2)
+#define PERIOD_3                 (3)
+#define PERIOD_4                 (4)
+#define PERIOD_5                 (5)
+#define PERIOD_6                 (6)
+#define PERIOD_7                 (7)
+#define PERIOD_8                 (8)
+#define PERIOD_9                 (9)
+#define PERIOD_10                (10)
 /* Can controller hardware bits related to the functions
    implementations.
    TXOK polling bit for sucessful transmission.

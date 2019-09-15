@@ -28,13 +28,13 @@
 #define CAN_DEV_ERROR_DETECT              (STD_ON)
 
 /* Precompile user configuration */
-#define CAN_MAIN_FUNCTION_WRITE_PERIOD    (PERIOD10)
+#define CAN_MAIN_FUNCTION_WRITE_PERIOD    (PERIOD_10)
 
 /* Can transmission processing type */
 #define CAN_TX_PROCESSING                 (POLLING)
 
 /* Can controller Id, if multiple controllers are supported by 
    the used hardware */
-#define CAN_CONTROLLER_ID                 (CAN_CONTROLLER0)
+#define CAN_CONTROLLER_ID                 (CAN_CONTROLLER_0)
 
 #endif /* CAN_CFG_H */
