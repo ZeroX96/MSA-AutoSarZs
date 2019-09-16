@@ -11,10 +11,13 @@
 #define CAN_H
 
 /* Id for the company in the AUTOSAR */
-#define CAN_VENDOR_ID                          (03U)
+#define CAN_VENDOR_ID                          (3U)
 
 /* Module Id */ 
-#define CAN_MODULE_ID                          (080U)
+#define CAN_MODULE_ID                          (80U)
+
+/* Instance Id */
+#define CAN_INSTANCE_ID                        (0U)
 
 /* Module Version 1.0.0 */
 #define CAN_SW_MAJOR_VERSION                   (1U)
@@ -74,13 +77,15 @@
 /* API Service used without initialization */		   
 #define CAN_E_UNINIT                                  ((uint8)0x05) 
 
+/* Can Initialization checking Macros */
+#define CAN_INITIALIZED                               ((uint8)1)
+#define CAN_NOT_INITIALIZED                           ((uint8)0)
+                   
+
 /***************************************************************
 *             Module Data Types (task relatd)                  *
 ****************************************************************/
-/*
-  States that are used by the several ControllerMode functions. 
-  Enumeration type definition. */
-typedef uint8 Can_ControllerStateType;
+
 /* CAN controller state UNINIT. */
 #define CAN_CS_UNINIT                  ((Can_ControllerStateType)0x00)
 /* CAN controller state STARTED. */
@@ -101,6 +106,60 @@ typedef uint8 Can_ControllerStateType;
 #define POLLING                        ((uint8)1)
 /* Mixed Mode of operation. */
 #define MIXED                          ((uint8)2)
+/* Two Can contorllers supported by Tivac 
+   Can controller 0 */
+#define CAN_CONTROLLER_0                ((uint8)0)
+/* Can controller 1*/
+#define CAN_CONTROLLER_1                ((uint8)1)
+/* Supported periods for the main function write */
+#define PERIOD_0                 (0)
+#define PERIOD_1                 (1)
+#define PERIOD_2                 (2)
+#define PERIOD_3                 (3)
+#define PERIOD_4                 (4)
+#define PERIOD_5                 (5)
+#define PERIOD_6                 (6)
+#define PERIOD_7                 (7)
+#define PERIOD_8                 (8)
+#define PERIOD_9                 (9)
+#define PERIOD_10                (10)
+/* Can controller hardware bits related to the functions
+   implementations.
+   TXOK polling bit for sucessful transmission.
+. */
+#define CANSTS_TXOK             (3)
+/* Tivac supported Can controller modes.
+   Initialization mode bit.
+   0 Normal operation.
+   1 Initialization started. */
+#define CANCTL_INIT             (0)
+/* 0 The CAN controller is operating normally. 
+   1 The CAN controller is in test mode. */
+#define CANCTL_TEST             (7)
+/* 0 Loopback mode is disabled. 
+   1 Loopback mode is enabled. In loopback mode, the data
+   from the transmitter is routed into the receiver. Any data
+   on the receive input is ignored. */
+#define CANTST_LBACK            (4)
+/* 0 Silent mode is disabled. 
+   1 Silent mode is enabled. In silent mode, the CAN controller
+     does not transmit data but instead monitors the bus. This
+     mode is also known as Bus Monitor mode. */
+#define CANTST_SILENT           (3)
+/* 0 Basic mode is disabled. 
+   1 Basic mode is enabled. In basic mode, software should
+   use the CANIF1 registers as the transmit buffer and use
+   the CANIF2 registers as the receive buffer. */
+#define CANTST_BASIC            (2)
+
+#include "Can_Cfg.h"
+/* Check compatibility of Can.h AUTOSAR version with
+* Can_Cfg AUTOSAR version. */
+#if ((CAN_CFG_AR_RELEASE_MAJOR_VERSION != CAN_AR_RELEASE_MAJOR_VERSION)\
+ ||  (CAN_CFG_AR_RELEASE_MINOR_VERSION != CAN_AR_RELEASE_MINOR_VERSION)\
+ ||  (CAN_CFG_AR_RELEASE_PATCH_VERSION != CAN_AR_RELEASE_PATCH_VERSION))
+#error "The AR version of Can_Cfg.h does not match the expected version"
+#endif
 
 /***************************************************************
 *          Functions Prototypes (task related)                 *
@@ -135,7 +194,7 @@ Std_ReturnType Can_GetControllerMode(uint8 Controller,
 * Service ID[hex]: 0x01
 * Description:     This function performs the polling of TX confirmation
                    when CAN_TX_PROCESSING is set to POLLING. 
-NOTE:              Calling this function is according to the required
+* NOTE:            Calling this function is according to the required
                    period cycles, (0, 1, 2,...)
 ****************************************************************/
 void Can_MainFunction_Write(void);

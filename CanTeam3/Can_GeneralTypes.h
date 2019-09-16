@@ -20,7 +20,10 @@
 #define CAN_GENERAL_TYPES_AR_RELEASE_MINOR_VERSION           (3U)
 #define CAN_GENERAL_TYPES_AR_RELEASE_PATCH_VERSION           (1U)
 
-/* The current state/mode of the Can controller.
+/* 
+  States that are used by the several ControllerMode functions.
+  Enumeration type definition. 
+  The current state/mode of the Can controller.
    Modes such as:
 		initialization,
 		bus error,
