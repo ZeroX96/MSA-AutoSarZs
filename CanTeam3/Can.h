@@ -11,10 +11,13 @@
 #define CAN_H
 
 /* Id for the company in the AUTOSAR */
-#define CAN_VENDOR_ID                          (03U)
+#define CAN_VENDOR_ID                          (3U)
 
 /* Module Id */ 
-#define CAN_MODULE_ID                          (080U)
+#define CAN_MODULE_ID                          (80U)
+
+/* Instance Id */
+#define CAN_INSTANCE_ID                        (0U)
 
 /* Module Version 1.0.0 */
 #define CAN_SW_MAJOR_VERSION                   (1U)
@@ -73,6 +76,11 @@
 #define CAN_E_PARAM_CONTROLLER						  ((uint8)0x04)
 /* API Service used without initialization */		   
 #define CAN_E_UNINIT                                  ((uint8)0x05) 
+
+/* Can Initialization checking Macros */
+#define CAN_INITIALIZED                               ((uint8)1)
+#define CAN_NOT_INITIALIZED                           ((uint8)0)
+                   
 
 /***************************************************************
 *             Module Data Types (task relatd)                  *
