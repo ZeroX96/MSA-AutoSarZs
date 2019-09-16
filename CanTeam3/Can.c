@@ -36,11 +36,17 @@
 STATIC void CanMainFunctionTxPolling(uint8 can_controller_id, 
 	float32 period);
 STATIC void CanMainFunctionTxProcessing(void);
+STATIC void CanGetMode(uint8 controller, 
+	Can_ControllerStateType mode);
+STATIC Can_ControllerStateType CanGetState(uint32 tst_reg, 
+	uint32 ctrl_reg);
+
 /***************************************************************/
 /*            Private Globals Declarations                     */
 /***************************************************************/
-STATIC uint32 * CanControllerRegiser_Ptr = NULL_PTR;
-STATIC uint32 * CanStatusRegister_Ptr    = NULL_PTR;
+STATIC uint32 * CanStatusRegister_Ptr = NULL_PTR;
+STATIC uint32 * CanControlRegister_Ptr = NULL_PTR;
+STATIC uint8   Can_InitStatus = CAN_INITIALIZED;
 
 /***************************************************************
 *                    Functions Definitions                     *
@@ -49,7 +55,25 @@ STATIC uint32 * CanStatusRegister_Ptr    = NULL_PTR;
 Std_ReturnType Can_GetControllerMode(uint8 Controller,
 	Can_ControllerStateType* ControllerModePtr)
 {
-
+#if (CAN_DEV_ERROR_DETECT == STD_ON)     /* Report errors */
+	if (CAN_NOT_INITIALIZED == Can_InitStatus)
+	{
+		Det_ReportError(CAN_MODULE_ID, CAN_INSTANCE_ID,
+			CAN_GET_CONTROLLER_MODE_SID, CAN_E_UNINIT);
+		return E_NOT_OK;
+	}
+	if (CAN_CONTROLLER_ID <= Controller)
+	{
+		Det_ReportError(CAN_MODULE_ID, CAN_INSTANCE_ID,
+			CAN_GET_CONTROLLER_MODE_SID, CAN_E_PARAM_CONTROLLER);
+	}
+	if (NULL_PTR == ControllerModePtr)
+	{
+		Det_ReportError(CAN_MODULE_ID, CAN_INSTANCE_ID,
+			CAN_GET_CONTROLLER_MODE_SID, CAN_E_PARAM_POINTER);
+	}
+#endif /* (CAN_DEV_ERROR_DETECT == STD_ON) */
+	CanGetMode(Controller, *ControllerModePtr);
 }
 
 /**************************************************************/
@@ -115,17 +139,17 @@ void Can_MainFunction_Write(void)
 	switch (CAN_CONTROLLER_ID)
 	{
 		case CAN_CONTROLLER_0:
-			CanControllerRegiser_Ptr = &CAN0_STS_R;
+			CanStatusRegister_Ptr = &CAN0_STS_R;
 			break;
 		case CAN_CONTROLLER_1:
-			CanControllerRegiser_Ptr = &CAN1_STS_R;
+			CanStatusRegister_Ptr = &CAN1_STS_R;
 			break;
 		default:
-			CanControllerRegiser_Ptr = &CAN0_STS_R;
+			CanStatusRegister_Ptr = &CAN0_STS_R;
 			break;
 	}
 
-	while (BIT_IS_CLEAR(*CanControllerRegiser_Ptr, CANSTS_TXOK)) 
+	while (BIT_IS_CLEAR(*CanStatusRegister_Ptr, CANSTS_TXOK)) 
 	{
 	};
 }
@@ -144,7 +168,7 @@ STATIC void CanMainFunctionTxProcessing(void)
 	switch (CAN_TX_PROCESSING)
 	{
 		case POLLING:
-			CanMainFunctionTxPolling(CAN_CONTROLLER_ID, PERIOD_10);
+			CanMainFunctionTxPolling(CAN_CONTROLLER_0, PERIOD_10);
 			break;
 		case MIXED: /* TO BE IMPLEMENTED. */
 			break;
@@ -162,21 +186,64 @@ STATIC void CanMainFunctionTxPolling(uint8 can_controller_id,
 	switch (can_controller_id)
 	{
 		case CAN_CONTROLLER_0:
-			CanControllerRegiser_Ptr = &CAN0_STS_R;
+			CanStatusRegister_Ptr = &CAN0_STS_R;
 			break;
 		case CAN_CONTROLLER_1:
-			CanControllerRegiser_Ptr = &CAN1_STS_R;
+			CanStatusRegister_Ptr = &CAN1_STS_R;
 			break;
 		default:
-			CanControllerRegiser_Ptr = &CAN0_STS_R;
+			CanStatusRegister_Ptr = &CAN0_STS_R;
 			break;
 	}
 
 	/* Wait until transmission is a success or period is timeout. */
-	while (BIT_IS_CLEAR(*CanControllerRegiser_Ptr, CANSTS_TXOK) &&
+	while (BIT_IS_CLEAR(*CanStatusRegister_Ptr, CANSTS_TXOK) &&
 		(period > 0))
 	{
 		period = period - 1;     /* TO BE EDITTED */
 	}
 }
 
+/*
+	Checking Can controller certain mode.
+*/
+STATIC void CanGetMode(uint8 controller, 
+	Can_ControllerStateType mode)
+{
+	switch (controller)
+	{
+		case CAN_CONTROLLER_0:
+			CanStatusRegister_Ptr = &CAN0_TST_R;
+			CanControlRegister_Ptr = &CAN0_CTL_R;
+			mode = CanGetState(*CanStatusRegister_Ptr, *CanControlRegister_Ptr);
+			break;
+		case CAN_CONTROLLER_1:
+			CanStatusRegister_Ptr = &CAN1_TST_R;
+			CanControlRegister_Ptr = &CAN1_CTL_R;
+			mode = CanGetState(*CanStatusRegister_Ptr, *CanControlRegister_Ptr);
+			break;
+		default:
+			break;
+	}
+}
+
+/*
+	Returning the Can supported states.
+*/
+STATIC Can_ControllerStateType CanGetState(uint32 tst_reg,
+	uint32 ctrl_reg)
+{
+	if (BIT_IS_CLEAR(ctrl_reg, CANCTL_INIT))      /* Normal mode */
+	{
+		return CAN_CS_STARTED;
+	}
+	else if (BIT_IS_SET(tst_reg, CANTST_SILENT)) /* Bus monitoring mode */
+	{
+		return CAN_CS_STOPPED;
+	}
+	else 
+	{
+		/* The rest of the modes are not supported by Tivac HW 
+		   as far as I know :D */
+	}
+}
