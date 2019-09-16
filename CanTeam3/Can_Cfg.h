@@ -35,6 +35,6 @@
 
 /* Can controller Id, if multiple controllers are supported by 
    the used hardware */
-#define CAN_CONTROLLER_ID                 (CAN_CONTROLLER_0)
+#define CAN_CONTROLLER_ID                 (2U)
 
 #endif /* CAN_CFG_H */
