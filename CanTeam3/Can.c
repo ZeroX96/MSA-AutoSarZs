@@ -241,7 +241,11 @@ STATIC Can_ControllerStateType CanGetState(uint32 tst_reg,
 	{
 		return CAN_CS_STOPPED;
 	}
-	else 
+	else if (CAN_NOT_INITIALIZED == Can_InitStatus)
+	{
+		return CAN_CS_UNINIT;
+	}
+	else
 	{
 		/* The rest of the modes are not supported by Tivac HW 
 		   as far as I know :D */
