@@ -37,4 +37,9 @@
    the used hardware */
 #define CAN_CONTROLLER_ID                 (2U)
 
+/* Enables polling of this hardware object. */
+#if (CAN_TX_PROCESSING == MIXED)
+#define CAN_HARDWARE_OBJECT_USES_POLLING (TRUE)
+#endif
+
 #endif /* CAN_CFG_H */

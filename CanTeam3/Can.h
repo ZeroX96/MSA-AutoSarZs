@@ -29,7 +29,19 @@
 #define CAN_AR_RELEASE_MINOR_VERSION           (3U)
 #define CAN_AR_RELEASE_PATCH_VERSION           (1U)
 
-/* AUTOSAR files inclusion */
+/**************************************************************
+*                     Non AUTOSAR files                      *
+**************************************************************/
+/*
+* Microcontroller specific configurations */
+#include "tm4c123gh6pm.h"
+
+/* Macros for hardware initializations */
+#include "Bit_Manipulation.h"
+
+/**************************************************************
+*                   AUTOSAR files inclusion                   *
+**************************************************************/
 #include "Std_Types.h"
 /* Check compatibility of Can.h AUTOSAR version with
 * Std_Types AUTOSAR version. */
@@ -46,16 +58,6 @@
 #error "The AR version of Can_GeneralTypes.h does not match the expected version"
 #endif
 
-/**************************************************************
-*                     Non AUTOSAR files                      *
-**************************************************************/
-/*
-* Microcontroller specific configurations */
-#include "tm4c123gh6pm.h"
-
-/* Macros for hardware initializations */
-#include "Bit_Manipulation.h"
-
 /***************************************************************
 *            API Service ID Macros (task related)              *
 ****************************************************************/
@@ -71,16 +73,11 @@
 /*
  API  Service  called  with wrong parameter */
 #define CAN_E_PARAM_POINTER                           ((uint8)0x01)
-#define CAN_E_PARAM_HANDLE							  ((uint8)0x02)
-#define CAN_E_PARAM_DATA_LENGTH						  ((uint8)0x03)
-#define CAN_E_PARAM_CONTROLLER						  ((uint8)0x04)
+#define CAN_E_PARAM_HANDLE							              ((uint8)0x02)
+#define CAN_E_PARAM_DATA_LENGTH						            ((uint8)0x03)
+#define CAN_E_PARAM_CONTROLLER						            ((uint8)0x04)
 /* API Service used without initialization */		   
 #define CAN_E_UNINIT                                  ((uint8)0x05) 
-
-/* Can Initialization checking Macros */
-#define CAN_INITIALIZED                               ((uint8)1)
-#define CAN_NOT_INITIALIZED                           ((uint8)0)
-                   
 
 /***************************************************************
 *             Module Data Types (task relatd)                  *
@@ -94,7 +91,6 @@
 #define CAN_CS_STOPPED                 ((Can_ControllerStateType)0x02)
 /* CAN controller state SLEEP. */
 #define CAN_CS_SLEEP                   ((Can_ControllerStateType)0x03)
-
 /***************************************************************
 *           Can Processing Macros (task relatd)                *
 ****************************************************************/
@@ -108,21 +104,21 @@
 #define MIXED                          ((uint8)2)
 /* Two Can contorllers supported by Tivac 
    Can controller 0 */
-#define CAN_CONTROLLER_0                ((uint8)0)
+#define CAN_CONTROLLER_0               ((uint8)0)
 /* Can controller 1*/
-#define CAN_CONTROLLER_1                ((uint8)1)
+#define CAN_CONTROLLER_1               ((uint8)1)
 /* Supported periods for the main function write */
-#define PERIOD_0                 (0)
-#define PERIOD_1                 (1)
-#define PERIOD_2                 (2)
-#define PERIOD_3                 (3)
-#define PERIOD_4                 (4)
-#define PERIOD_5                 (5)
-#define PERIOD_6                 (6)
-#define PERIOD_7                 (7)
-#define PERIOD_8                 (8)
-#define PERIOD_9                 (9)
-#define PERIOD_10                (10)
+#define PERIOD_0                        (0)
+#define PERIOD_1                        (1)
+#define PERIOD_2                        (2)
+#define PERIOD_3                        (3)
+#define PERIOD_4                        (4)
+#define PERIOD_5                        (5)
+#define PERIOD_6                        (6)
+#define PERIOD_7                        (7)
+#define PERIOD_8                        (8)
+#define PERIOD_9                        (9)
+#define PERIOD_10                       (10)
 /* Can controller hardware bits related to the functions
    implementations.
    TXOK polling bit for sucessful transmission.
