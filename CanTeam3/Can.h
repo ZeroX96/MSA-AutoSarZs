@@ -102,6 +102,11 @@
 #define POLLING                        ((uint8)1)
 /* Mixed Mode of operation. */
 #define MIXED                          ((uint8)2)
+/* Enables polling of this hardware object. */
+#if (CAN_TX_PROCESSING == MIXED)
+#define CAN_HARDWARE_OBJECT_USES_POLLING (TRUE)
+#endif
+
 /* Two Can contorllers supported by Tivac 
    Can controller 0 */
 #define CAN_CONTROLLER_0               ((uint8)0)
