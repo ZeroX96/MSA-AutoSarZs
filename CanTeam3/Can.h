@@ -103,55 +103,44 @@
 /* Mixed Mode of operation. */
 #define MIXED                          ((uint8)2)
 /* Enables polling of this hardware object. */
-#if (CAN_TX_PROCESSING == MIXED)
+#ifdef MIXED
 #define CAN_HARDWARE_OBJECT_USES_POLLING (TRUE)
 #endif
+
+/* Message objects number to poll on. */
+#define CAN_MSG_OBJECT_NUM             ((uint8) 32)
 
 /* Two Can contorllers supported by Tivac 
    Can controller 0 */
 #define CAN_CONTROLLER_0               ((uint8)0)
 /* Can controller 1*/
 #define CAN_CONTROLLER_1               ((uint8)1)
+
 /* Supported periods for the main function write */
-#define PERIOD_0                        (0)
-#define PERIOD_1                        (1)
-#define PERIOD_2                        (2)
-#define PERIOD_3                        (3)
-#define PERIOD_4                        (4)
-#define PERIOD_5                        (5)
-#define PERIOD_6                        (6)
-#define PERIOD_7                        (7)
-#define PERIOD_8                        (8)
-#define PERIOD_9                        (9)
-#define PERIOD_10                       (10)
+#define PERIOD_0                       (0)
+#define PERIOD_1                       (1)
+#define PERIOD_2                       (2)
+#define PERIOD_3                       (3)
+#define PERIOD_4                       (4)
+#define PERIOD_5                       (5)
+#define PERIOD_6                       (6)
+#define PERIOD_7                       (7)
+#define PERIOD_8                       (8)
+#define PERIOD_9                       (9)
+#define PERIOD_10                      (10)
 /* Can controller hardware bits related to the functions
    implementations.
-   TXOK polling bit for sucessful transmission.
-. */
-#define CANSTS_TXOK             (3)
-/* Tivac supported Can controller modes.
-   Initialization mode bit.
-   0 Normal operation.
-   1 Initialization started. */
-#define CANCTL_INIT             (0)
-/* 0 The CAN controller is operating normally. 
-   1 The CAN controller is in test mode. */
-#define CANCTL_TEST             (7)
-/* 0 Loopback mode is disabled. 
-   1 Loopback mode is enabled. In loopback mode, the data
-   from the transmitter is routed into the receiver. Any data
-   on the receive input is ignored. */
-#define CANTST_LBACK            (4)
-/* 0 Silent mode is disabled. 
-   1 Silent mode is enabled. In silent mode, the CAN controller
-     does not transmit data but instead monitors the bus. This
-     mode is also known as Bus Monitor mode. */
-#define CANTST_SILENT           (3)
-/* 0 Basic mode is disabled. 
-   1 Basic mode is enabled. In basic mode, software should
-   use the CANIF1 registers as the transmit buffer and use
-   the CANIF2 registers as the receive buffer. */
-#define CANTST_BASIC            (2)
+*/
+/* Write not read bit */
+#define WRNRD                          (7)
+/* Transmission request bit */
+#define TXRQST                         (8)
+/* Buffer transfer request bit */
+#define TXRQST_BUF                     (2)
+/* First message object number */
+#define CAN_MSG_OBJECT_BEG             (0x01)
+/* Last message object number */
+#define CAN_MSG_OBJECT_END             (0x20)
 
 #include "Can_Cfg.h"
 /* Check compatibility of Can.h AUTOSAR version with
