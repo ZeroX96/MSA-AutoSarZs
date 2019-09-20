@@ -35,19 +35,26 @@
 	Local function to check on the TXOK bit for specified 
 	period/time tick.
 */
-STATIC void CanMainFunctionTxPolling(uint8 can_controller_id);
 STATIC void CanMainFunctionTxProcessing(void);
 
 /***************************************************************/
 /*            Private Globals Declarations                     */
 /***************************************************************/
-STATIC uint32 * CanStatusRegister_Ptr = NULL_PTR;
-STATIC uint32 * CanControlRegister_Ptr = NULL_PTR;
 STATIC uint8 CanModes[CAN_CONTROLLER_ID] = {CAN_CS_UNINIT,
 											CAN_CS_UNINIT};
 /* Global flag to inform of sucessful transmission from the 
    Can_MainFunction_Write. */
 STATIC boolean CanMainFunctionTxSucessFlag = FALSE;
+/*
+	Array holds the Can message objects that is configured 
+	to be Polling or Mixed CanTxProcessing. 
+	Shall be filled with the 32 message numbers.
+*/
+STATIC uint8 MessageObjects[CAN_MSG_OBJECT_NUM];
+/*
+	Global for assigning the current operating controller.
+*/
+STATIC uint8 OperatingController = CAN_CONTROLLER_0;
 
 /***************************************************************
 *                    Functions Definitions                     *
@@ -142,22 +149,7 @@ void Can_MainFunction_Write_10(void)
 #else /* No period was defined. */
 void Can_MainFunction_Write(void)
 {
-	switch (CAN_CONTROLLER_ID)
-	{
-		case CAN_CONTROLLER_0:
-			CanStatusRegister_Ptr = &CAN0_STS_R;
-			break;
-		case CAN_CONTROLLER_1:
-			CanStatusRegister_Ptr = &CAN1_STS_R;
-			break;
-		default:
-			CanStatusRegister_Ptr = &CAN0_STS_R;
-			break;
-	}
-
-	while (BIT_IS_CLEAR(*CanStatusRegister_Ptr, CANSTS_TXOK)) 
-	{
-	};
+	
 }
 #endif /* CAN_MAIN_FUNCTION_WRITE_PERIOD. */
 
@@ -166,19 +158,84 @@ void Can_MainFunction_Write(void)
 /*           Private Functions Definitions                    */
 /**************************************************************/
 /*
-Processing the Can transmission:
-polling, mixed or interrupt.
+	Processing the Can transmission:
+	polling, mixed or interrupt.
 */
 STATIC void CanMainFunctionTxProcessing(void)
 {
+	uint16 *CanIfCrqReg = NULL_PTR;        /* Can interface cmd request */
+	uint16 *CanIfCmskReg = NULL_PTR;       /* Can interface cmd mask */
+	uint16 *CanIfMctlReg = NULL_PTR;       /* Can interface message control */
+	uint8 mesg_num = CAN_MSG_OBJECT_BEG;
+	uint8 mesg_index = 0;
+
+	switch (OperatingController)
+	{
+		case CAN_CONTROLLER_0:
+			CanIfCrqReg = &CAN0_IF1CRQ_R;
+			CanIfCmskReg = &CAN0_IF1CMSK_R;
+			CanIfMctlReg = &CAN0_IF1MCTL_R;
+			break;
+		case CAN_CONTROLLER_1:
+			CanIfCrqReg = &CAN1_IF1CRQ_R;
+			CanIfCmskReg = &CAN1_IF1CMSK_R;
+			CanIfMctlReg = &CAN1_IF1MCTL_R;
+			break;
+		default:
+			CanIfCrqReg = &CAN0_IF1CRQ_R;
+			CanIfCmskReg = &CAN0_IF1CMSK_R;
+			CanIfMctlReg = &CAN0_IF1MCTL_R;
+		break;
+	}
+
 	switch (CAN_TX_PROCESSING)
 	{
-		case POLLING:
-			CanMainFunctionTxPolling(CAN_CONTROLLER_0);
+		case POLLING:   /* Poll on the whole message objects */
+			CLEAR_BIT(*CanIfMctlReg, WRNRD);
+			CLEAR_BIT(*CanIfCmskReg, TXRQST_BUF);
+
+			for (mesg_num = CAN_MSG_OBJECT_BEG; mesg_num <= CAN_MSG_OBJECT_END; mesg_num++)
+			{
+				SET_VAL(*CanIfCrqReg, mesg_num);
+				if (BIT_IS_CLEAR(*CanIfMctlReg, TXRQST))
+				{
+					ENTER_CRITICAL_SECTION();
+					CanMainFunctionTxSucessFlag = TRUE;
+					EXIT_CRITICAL_SECTION();
+				}
+				else
+				{
+					ENTER_CRITICAL_SECTION();
+					CanMainFunctionTxSucessFlag = FALSE;
+					EXIT_CRITICAL_SECTION();
+				}
+			}
 			break;
-		case MIXED: /* TO BE IMPLEMENTED. */
+		case MIXED: /* Poll on the user specified message object */
+			CLEAR_BIT(*CanIfMctlReg, WRNRD);
+			CLEAR_BIT(*CanIfCmskReg, TXRQST_BUF);
+
+			for(mesg_index = 0; mesg_index < CAN_MSG_OBJECT_NUM; mesg_index++)
+			{
+				if (MessageObjects[mesg_index])   
+				{
+					SET_VAL(*CanIfCrqReg, MessageObjects[mesg_index]);
+					if (BIT_IS_CLEAR(*CanIfMctlReg, TXRQST))
+					{
+						ENTER_CRITICAL_SECTION();
+						CanMainFunctionTxSucessFlag = TRUE;
+						EXIT_CRITICAL_SECTION();
+					}
+					else
+					{
+						ENTER_CRITICAL_SECTION();
+						CanMainFunctionTxSucessFlag = FALSE;
+						EXIT_CRITICAL_SECTION();
+					}	
+				}
+			}
 			break;
-		default:    /* Defined neither POLLING nor MIXED. */
+		default: /* Defined neither POLLING nor MIXED. */
 			CanMainFunctionWriteDef();
 			break;
 	}
@@ -186,30 +243,7 @@ STATIC void CanMainFunctionTxProcessing(void)
 /*
 	Polling on the transmission successfulness. 
 */
-STATIC void CanMainFunctionTxPolling(uint8 can_controller_id)
-{
-	switch (can_controller_id)
-	{
-		case CAN_CONTROLLER_0:
-			CanStatusRegister_Ptr = &CAN0_STS_R;
-			break;
-		case CAN_CONTROLLER_1:
-			CanStatusRegister_Ptr = &CAN1_STS_R;
-			break;
-		default:
-			CanStatusRegister_Ptr = &CAN0_STS_R;
-			break;
-	}
 
-	if (BIT_IS_CLEAR(*CanStatusRegister_Ptr, CANSTS_TXOK)) /* TO BE EDITTED */
-	{
-		CanMainFunctionTxSucessFlag = TRUE;
-	}
-	else
-	{
-		CanMainFunctionTxSucessFlag = FALSE;
-	}
-}
 
 
 
