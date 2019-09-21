@@ -44,7 +44,7 @@ STATIC uint8 CanModes[CAN_CONTROLLER_ID] = {CAN_CS_UNINIT,
 											CAN_CS_UNINIT};
 /* Global flag to inform of sucessful transmission from the 
    Can_MainFunction_Write. */
-STATIC boolean CanMainFunctionTxSucessFlag = FALSE;
+STATIC boolean CanMainFunctionTxSuccessFlag = FALSE;
 /*
 	Array holds the Can message objects that is configured 
 	to be Polling or Mixed CanTxProcessing. 
@@ -163,28 +163,28 @@ void Can_MainFunction_Write(void)
 */
 STATIC void CanMainFunctionTxProcessing(void)
 {
-	uint16 *CanIfCrqReg = NULL_PTR;        /* Can interface cmd request */
-	uint16 *CanIfCmskReg = NULL_PTR;       /* Can interface cmd mask */
-	uint16 *CanIfMctlReg = NULL_PTR;       /* Can interface message control */
+	volatile uint32 *CanIfCrqReg = NULL_PTR;        /* Can interface cmd request */
+	volatile uint32 *CanIfCmskReg = NULL_PTR;       /* Can interface cmd mask */
+	volatile uint32 *CanIfMctlReg = NULL_PTR;       /* Can interface message control */
 	uint8 mesg_num = CAN_MSG_OBJECT_BEG;
 	uint8 mesg_index = 0;
 
 	switch (OperatingController)
 	{
 		case CAN_CONTROLLER_0:
-			CanIfCrqReg = &CAN0_IF1CRQ_R;
-			CanIfCmskReg = &CAN0_IF1CMSK_R;
-			CanIfMctlReg = &CAN0_IF1MCTL_R;
+			CanIfCrqReg = &(CAN0_IF1CRQ_R);
+			CanIfCmskReg = &(CAN0_IF1CMSK_R);
+			CanIfMctlReg = &(CAN0_IF1MCTL_R);
 			break;
 		case CAN_CONTROLLER_1:
-			CanIfCrqReg = &CAN1_IF1CRQ_R;
-			CanIfCmskReg = &CAN1_IF1CMSK_R;
-			CanIfMctlReg = &CAN1_IF1MCTL_R;
+			CanIfCrqReg = &(CAN1_IF1CRQ_R);
+			CanIfCmskReg = &(CAN1_IF1CMSK_R);
+			CanIfMctlReg = &(CAN1_IF1MCTL_R);
 			break;
 		default:
-			CanIfCrqReg = &CAN0_IF1CRQ_R;
-			CanIfCmskReg = &CAN0_IF1CMSK_R;
-			CanIfMctlReg = &CAN0_IF1MCTL_R;
+			CanIfCrqReg = &(CAN0_IF1CRQ_R);
+			CanIfCmskReg = &(CAN0_IF1CMSK_R);
+			CanIfMctlReg = &(CAN0_IF1MCTL_R);
 		break;
 	}
 
@@ -200,13 +200,13 @@ STATIC void CanMainFunctionTxProcessing(void)
 				if (BIT_IS_CLEAR(*CanIfMctlReg, TXRQST))
 				{
 					ENTER_CRITICAL_SECTION();
-					CanMainFunctionTxSucessFlag = TRUE;
+					CanMainFunctionTxSuccessFlag = TRUE;
 					EXIT_CRITICAL_SECTION();
 				}
 				else
 				{
 					ENTER_CRITICAL_SECTION();
-					CanMainFunctionTxSucessFlag = FALSE;
+					CanMainFunctionTxSuccessFlag = FALSE;
 					EXIT_CRITICAL_SECTION();
 				}
 			}
@@ -223,13 +223,13 @@ STATIC void CanMainFunctionTxProcessing(void)
 					if (BIT_IS_CLEAR(*CanIfMctlReg, TXRQST))
 					{
 						ENTER_CRITICAL_SECTION();
-						CanMainFunctionTxSucessFlag = TRUE;
+						CanMainFunctionTxSuccessFlag = TRUE;
 						EXIT_CRITICAL_SECTION();
 					}
 					else
 					{
 						ENTER_CRITICAL_SECTION();
-						CanMainFunctionTxSucessFlag = FALSE;
+						CanMainFunctionTxSuccessFlag = FALSE;
 						EXIT_CRITICAL_SECTION();
 					}	
 				}
